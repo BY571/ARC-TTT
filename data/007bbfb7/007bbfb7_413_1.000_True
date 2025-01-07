@@ -1,0 +1,400 @@
+****VERIFIER PROMPT****:
+
+PROMPT
+Examples
+
+Example 0
+Input
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+Output
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+
+Example 1
+Input
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+Output
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+
+Example 2
+Input
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+
+Example 3
+Input
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+Output
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+
+Example 4
+Input
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+
+
+
+
+
+****VERIFIER ANSWER****:
+
+The problem appears to involve a transformation of a 3x3 input matrix into a 9x9 output matrix. After analyzing the provided examples, we can observe that the transformation is based on the following rules:
+
+1. Each 3x3 sub-block in the output matrix corresponds to a single element in the input matrix.
+2. If the input element is non-zero, the corresponding sub-block in the output matrix is a copy of the input matrix.
+3. If the input element is zero, the corresponding sub-block in the output matrix is filled with zeros.
+4. The position of the non-zero sub-blocks in the output matrix is determined by the position of the non-zero elements in the input matrix.
+
+Here is a Python function that implements these rules:
+
+```python
+from typing import List
+
+def transform_grid(input_matrix: List[List[int]]) -> List[List[int]]:
+    """
+    This function transforms a 3x3 input matrix into a 9x9 output matrix.
+    Each 3x3 sub-block in the output matrix corresponds to a single element in the input matrix.
+    If the input element is non-zero, the corresponding sub-block in the output matrix is a copy of the input matrix.
+    If the input element is zero, the corresponding sub-block in the output matrix is filled with zeros.
+    
+    :param input_matrix: The input 3x3 matrix
+    :return: The output 9x9 matrix
+    """
+    output_matrix = [[0 for _ in range(9)] for _ in range(9)]
+    
+    for i in range(3):
+        for j in range(3):
+            if input_matrix[i][j] != 0:
+                for x in range(3):
+                    for y in range(3):
+                        output_matrix[3*i+x][3*j+y] = input_matrix[x][y]
+    
+    return output_matrix
+```
+
+This function initializes a 9x9 output matrix filled with zeros. Then it iterates over the input matrix, and for each non-zero element, it copies the entire input matrix to the corresponding sub-block in the output matrix.
+
+****VERIFIER RUN****:
+
+
+
+Input
+
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+
+Output
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Result
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Percentage solved
+
+100.00%
+
+****TEST RUN****:
+
+
+
+Input
+
+    A B C
+ 1  7 0 7
+ 2  7 0 7
+ 3  7 7 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+

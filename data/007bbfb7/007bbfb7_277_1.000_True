@@ -1,0 +1,424 @@
+****VERIFIER PROMPT****:
+
+PROMPT
+Examples
+
+Example 0
+Input
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+Output
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+
+Example 1
+Input
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+Output
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+
+Example 2
+Input
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+Output
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+
+Example 3
+Input
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+
+Example 4
+Input
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+
+
+
+
+
+****VERIFIER ANSWER****:
+
+Based on the given examples, it appears that the output matrix is a 9x9 matrix that results from transforming the input 3x3 matrix. The transformation process seems to be based on a specific pattern of repetition and rotation.
+
+Here's a step-by-step breakdown of the transformation process:
+
+1. Divide the 9x9 output matrix into nine 3x3 sub-matrices.
+2. For each of the nine 3x3 sub-matrices:
+   a. If the corresponding element in the input 3x3 matrix is non-zero, replicate the input 3x3 matrix into the 9x9 output matrix with the center of the input matrix aligned with the center of the output matrix.
+   b. If the corresponding element in the input 3x3 matrix is zero, leave the corresponding 3x3 sub-matrix in the output matrix unchanged (filled with zeros).
+
+Based on this rule, here is a Python function that implements the transformation:
+
+```python
+from typing import List
+
+def transform_grid(input_matrix: List[List[int]]) -> List[List[int]]:
+    """
+    This function transforms a given 3x3 input matrix into a 9x9 output matrix.
+    The transformation process involves replicating the input matrix or filling with zeros 
+    in each of the nine 3x3 sub-matrices of the output matrix based on the values in the input matrix.
+    """
+    output_matrix = [[0]*9 for _ in range(9)]  # Initialize the output matrix with zeros
+    
+    # Iterate over the input matrix
+    for i in range(3):
+        for j in range(3):
+            if input_matrix[i][j] != 0:  # If the current element in the input matrix is non-zero
+                # Replicate the input matrix into the output matrix
+                for k in range(9):
+                    for col in range(9):
+                        if k//3 == i and col//3 == j:  
+                            output_matrix[k][col] = input_matrix[k%3][col%3]
+    
+    return output_matrix
+
+# Example usage:
+input_matrix = [
+    [1, 2, 2],
+    [0, 0, 0],
+    [0, 2, 2]
+]
+output_matrix = transform_grid(input_matrix)
+for row in output_matrix:
+    print(row)
+
+input_matrix = [
+    [0, 7, 7],
+    [7, 7, 7],
+    [0, 7, 7]
+]
+output_matrix = transform_grid(input_matrix)
+for row in output_matrix:
+    print(row)
+
+# Add more examples as needed
+```
+
+In this function, the outer nested loops iterate over the input matrix. For each non-zero element, the inner nested loops replicate the input matrix into the output matrix by aligning its center with the center of the output matrix.
+
+Please note that this implementation assumes that the input matrix is a 3x3 matrix, and the output matrix is a 9x9 matrix. You may need to adjust the implementation to handle other matrix sizes.
+
+****VERIFIER RUN****:
+
+
+
+Input
+
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+
+Output
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Result
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Percentage solved
+
+100.00%
+
+****TEST RUN****:
+
+
+
+Input
+
+    A B C
+ 1  7 0 7
+ 2  7 0 7
+ 3  7 7 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+

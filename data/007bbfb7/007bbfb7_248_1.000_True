@@ -1,0 +1,425 @@
+****VERIFIER PROMPT****:
+
+Examples
+
+Example 0
+Input
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+Output
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+
+Example 1
+Input
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+Output
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+
+Example 2
+Input
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+Output
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+
+Example 3
+Input
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+
+Example 4
+Input
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+
+
+
+****VERIFIER ANSWER****:
+
+**Transforming a Grid Matrix**
+
+The problem involves transforming a 3x3 input matrix into a 9x9 output matrix, following a specific pattern.
+
+**Breaking Down the Problem**
+
+Let's analyze the examples and break down the problem into smaller parts:
+
+1.  **Sub-grid structure**: The output matrix consists of 9 sub-grids, each containing the same pattern as the input matrix. These sub-grids are arranged in a 3x3 layout.
+2.  **Sub-grid size**: Each sub-grid is a square of size equal to the length of the input matrix's rows.
+3.  **Sub-grid values**: Each sub-grid's values are determined by the corresponding element in the input matrix. If the input element is non-zero, the sub-grid will contain the same pattern as the input matrix; otherwise, it will be filled with zeros.
+4.  **Scaling**: The entire output matrix is scaled up by a factor of 3 in both rows and columns.
+
+**Simplifying the Rule**
+
+Based on this analysis, we can simplify the rule for transforming a grid matrix as follows:
+
+*   Split the input matrix into 9 sub-grids of equal size.
+*   For each non-zero element in the input matrix, fill its corresponding sub-grid with the same pattern as the input matrix.
+*   For each zero element in the input matrix, fill its corresponding sub-grid with zeros.
+*   Scale up the entire output matrix by a factor of 3 in both rows and columns.
+
+**Python Implementation**
+
+Here's the Python function implementing this rule:
+
+```python
+from typing import List
+
+def transform_grid(input_matrix: List[List[int]]) -> List[List[int]]:
+    """
+    Transform a 3x3 input matrix into a 9x9 output matrix by scaling up each element's pattern.
+
+    The output matrix consists of 9 sub-grids, each containing the same pattern as the input matrix.
+    If an input element is non-zero, its corresponding sub-grid will contain the same pattern;
+    otherwise, it will be filled with zeros. The entire output matrix is then scaled up by a factor of 3.
+
+    Args:
+        input_matrix (List[List[int]]): A 3x3 input matrix containing integers.
+
+    Returns:
+        List[List[int]]: A 9x9 output matrix resulting from the transformation.
+    """
+
+    # Define the sub-grid size (3x3 in this case)
+    sub_grid_size = 3
+
+    # Initialize an empty output matrix with the correct size (9x9)
+    output_matrix = [[0] * (sub_grid_size * 3) for _ in range(sub_grid_size * 3)]
+
+    # Iterate over each element in the input matrix
+    for i in range(sub_grid_size):
+        for j in range(sub_grid_size):
+            # If the input element is non-zero, fill its corresponding sub-grid with the pattern
+            if input_matrix[i][j] != 0:
+                for x in range(sub_grid_size):
+                    for y in range(sub_grid_size):
+                        output_matrix[i * sub_grid_size + x][j * sub_grid_size + y] = input_matrix[x][y]
+
+    return output_matrix
+```
+
+This function takes a 3x3 input matrix, scales up each element's pattern, and returns the resulting 9x9 output matrix. It uses a nested loop approach to iterate over each element in the input matrix and fill its corresponding sub-grid in the output matrix with the correct pattern.
+
+****VERIFIER RUN****:
+
+
+
+Input
+
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+
+Output
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Result
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Percentage solved
+
+100.00%
+
+****TEST RUN****:
+
+
+
+Input
+
+    A B C
+ 1  7 0 7
+ 2  7 0 7
+ 3  7 7 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+

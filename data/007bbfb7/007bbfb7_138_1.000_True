@@ -1,0 +1,435 @@
+****VERIFIER PROMPT****:
+
+Examples
+
+Example 0
+Input
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+Output
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+
+Example 1
+Input
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+
+Example 2
+Input
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+Output
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+
+Example 3
+Input
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+
+Example 4
+Input
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+Output
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+
+
+
+****VERIFIER ANSWER****:
+
+Based on the provided examples, we can reason that the problem involves transforming a 3x3 input matrix into a 9x9 output matrix. The transformation appears to be based on a fractal pattern, where the output matrix is constructed by replacing each element in the input matrix with a 3x3 sub-matrix.
+
+Here's the step-by-step reasoning:
+
+1. The output matrix is 3 times the size of the input matrix, with each row and column being tripled.
+2. Each element in the input matrix is replaced by a 3x3 sub-matrix in the output matrix.
+3. If an element in the input matrix is 0, the corresponding 3x3 sub-matrix in the output matrix is filled with zeros.
+4. If an element in the input matrix is non-zero, the corresponding 3x3 sub-matrix in the output matrix contains the same pattern as the input matrix.
+
+Here's a simplified rule:
+
+* For each element in the input matrix, create a 3x3 sub-matrix in the output matrix.
+* If the element is 0, fill the sub-matrix with zeros.
+* If the element is non-zero, recursively apply the transformation rule to the sub-matrix.
+
+Here's the Python code:
+
+```python
+from typing import List
+
+def transform_grid(input_matrix: List[List[int]]) -> List[List[int]]:
+    """
+    Transforms a 3x3 input matrix into a 9x9 output matrix based on a fractal pattern.
+    
+    For each element in the input matrix, a 3x3 sub-matrix is created in the output matrix.
+    If the element is 0, the sub-matrix is filled with zeros.
+    If the element is non-zero, the sub-matrix contains the same pattern as the input matrix.
+    """
+    n = len(input_matrix)
+    output_matrix = [[0] * (3 * n) for _ in range(3 * n)]
+
+    def fill_sub_matrix(row, col, val):
+        if val == 0:
+            for i in range(3):
+                for j in range(3):
+                    output_matrix[row + i][col + j] = 0
+        else:
+            for i in range(3):
+                for j in range(3):
+                    output_matrix[row + i][col + j] = transform_grid([[input_matrix[(row + k) % 3][(col + l) % 3] for l in range(3)] for k in range(3)])[i][j]
+
+    for i in range(n):
+        for j in range(n):
+            fill_sub_matrix(3 * i, 3 * j, input_matrix[i][j])
+
+    return output_matrix
+```
+
+However, this solution has an exponential time complexity due to the recursive nature of the transformation. We can optimize this by using a different approach that avoids recursion:
+
+```python
+from typing import List
+
+def transform_grid(input_matrix: List[List[int]]) -> List[List[int]]:
+    """
+    Transforms a 3x3 input matrix into a 9x9 output matrix based on a fractal pattern.
+    
+    For each element in the input matrix, a 3x3 sub-matrix is created in the output matrix.
+    If the element is 0, the sub-matrix is filled with zeros.
+    If the element is non-zero, the sub-matrix contains the same pattern as the input matrix.
+    """
+    n = len(input_matrix)
+    output_matrix = [[0] * (3 * n) for _ in range(3 * n)]
+
+    for i in range(3 * n):
+        for j in range(3 * n):
+            if input_matrix[i // 3][j // 3] != 0:
+                output_matrix[i][j] = input_matrix[i % 3][j % 3]
+
+    return output_matrix
+```
+
+This optimized solution has a linear time complexity and produces the correct output.
+
+****VERIFIER RUN****:
+
+
+
+Input
+
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+
+Output
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Result
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Percentage solved
+
+100.00%
+
+Input
+
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Percentage solved
+
+100.00%
+
+****TEST RUN****:
+
+
+
+Input
+
+    A B C
+ 1  7 0 7
+ 2  7 0 7
+ 3  7 7 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Percentage solved
+
+100.00%
+

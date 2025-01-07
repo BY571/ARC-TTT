@@ -1,0 +1,406 @@
+****VERIFIER PROMPT****:
+
+PROMPT
+Examples
+
+Example 0
+Input
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+Output
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+
+Example 1
+Input
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+Output
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+
+Example 2
+Input
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+Output
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+
+Example 3
+Input
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+
+Example 4
+Input
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+Output
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+
+
+
+
+
+****VERIFIER ANSWER****:
+
+After analyzing the examples, we can see a clear pattern. The input matrix is being repeated in a specific way to create the output matrix. The repetition pattern is based on the dimensions of the input matrix. Let's break it down:
+
+*   The output matrix is 3 times the size of the input matrix in both rows and columns.
+*   The input matrix is repeated 9 times (3^2) to fill the output matrix.
+*   The repetition pattern is such that the top-left, middle, and bottom-right corners of the input matrix are repeated in a specific way to create the 3x3 sub-blocks of the output matrix.
+
+Here's the simplest and most general rule:
+
+**Rule:** The input matrix is repeated in a 3x3 pattern to create the output matrix. Each element of the input matrix is repeated to fill a 3x3 sub-block of the output matrix.
+
+**Python Code:**
+
+```python
+from typing import List
+
+def transform_grid(input_matrix: List[List[int]]) -> List[List[int]]:
+    """
+    This function transforms the input matrix by repeating it in a 3x3 pattern
+    to create the output matrix. Each element of the input matrix is repeated
+    to fill a 3x3 sub-block of the output matrix.
+
+    Args:
+        input_matrix (List[List[int]]): The input matrix to be transformed.
+
+    Returns:
+        List[List[int]]: The transformed output matrix.
+    """
+    n = len(input_matrix)
+    output_matrix = [[0] * (3 * n) for _ in range(3 * n)]
+
+    for i in range(n):
+        for j in range(n):
+            value = input_matrix[i][j]
+            for k in range(3):
+                for col in range(3):
+                    output_matrix[i * 3 + k][j * 3 + col] = value
+
+    return output_matrix
+```
+
+This code works by iterating over each element of the input matrix and repeating it in a 3x3 pattern to fill the corresponding sub-block of the output matrix. The `output_matrix` is initialized with zeros, and then filled in with the repeated elements from the input matrix.
+
+****VERIFIER RUN****:
+
+
+
+Input
+
+    A B C
+ 1  6 6 0
+ 2  6 0 0
+ 3  0 6 6
+
+
+Output
+
+    A B C D E F G H I
+ 1  6 6 0 6 6 0 0 0 0
+ 2  6 0 0 6 0 0 0 0 0
+ 3  0 6 6 0 6 6 0 0 0
+ 4  6 6 0 0 0 0 0 0 0
+ 5  6 0 0 0 0 0 0 0 0
+ 6  0 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 0 6 6 0
+ 8  0 0 0 6 0 0 6 0 0
+ 9  0 0 0 0 6 6 0 6 6
+
+
+Result
+
+    A B C D E F G H I
+ 1  6 6 6 6 6 6 0 0 0
+ 2  6 6 6 6 6 6 0 0 0
+ 3  6 6 6 6 6 6 0 0 0
+ 4  6 6 6 0 0 0 0 0 0
+ 5  6 6 6 0 0 0 0 0 0
+ 6  6 6 6 0 0 0 0 0 0
+ 7  0 0 0 6 6 6 6 6 6
+ 8  0 0 0 6 6 6 6 6 6
+ 9  0 0 0 6 6 6 6 6 6
+
+
+Percentage solved
+
+75.31%
+
+Input
+
+    A B C
+ 1  0 7 7
+ 2  7 7 7
+ 3  0 7 7
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 7 7 0 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 0 7 7 0 7 7
+ 4  0 7 7 0 7 7 0 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  0 7 7 0 7 7 0 7 7
+ 7  0 0 0 0 7 7 0 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 0 7 7 0 7 7
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 7 7 7 7 7 7
+ 2  0 0 0 7 7 7 7 7 7
+ 3  0 0 0 7 7 7 7 7 7
+ 4  7 7 7 7 7 7 7 7 7
+ 5  7 7 7 7 7 7 7 7 7
+ 6  7 7 7 7 7 7 7 7 7
+ 7  0 0 0 7 7 7 7 7 7
+ 8  0 0 0 7 7 7 7 7 7
+ 9  0 0 0 7 7 7 7 7 7
+
+
+Percentage solved
+
+82.72%
+
+Input
+
+    A B C
+ 1  2 2 2
+ 2  0 0 0
+ 3  0 2 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 2 2 0 2 2 0 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 2 2 0 2 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  2 2 2 2 2 2 2 2 2
+ 2  2 2 2 2 2 2 2 2 2
+ 3  2 2 2 2 2 2 2 2 2
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 2 2 2 2 2 2
+ 8  0 0 0 2 2 2 2 2 2
+ 9  0 0 0 2 2 2 2 2 2
+
+
+Percentage solved
+
+75.31%
+
+Input
+
+    A B C
+ 1  4 0 4
+ 2  0 0 0
+ 3  0 4 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  4 0 4 0 0 0 4 0 4
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 4 0 0 0 0 0 4 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 0 4 0 0 0
+ 8  0 0 0 0 0 0 0 0 0
+ 9  0 0 0 0 4 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  4 4 4 0 0 0 4 4 4
+ 2  4 4 4 0 0 0 4 4 4
+ 3  4 4 4 0 0 0 4 4 4
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 0
+ 6  0 0 0 0 0 0 0 0 0
+ 7  0 0 0 4 4 4 0 0 0
+ 8  0 0 0 4 4 4 0 0 0
+ 9  0 0 0 4 4 4 0 0 0
+
+
+Percentage solved
+
+77.78%
+
+Input
+
+    A B C
+ 1  0 0 0
+ 2  0 0 2
+ 3  2 0 2
+
+
+Output
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 0 0 0
+ 5  0 0 0 0 0 0 0 0 2
+ 6  0 0 0 0 0 0 2 0 2
+ 7  0 0 0 0 0 0 0 0 0
+ 8  0 0 2 0 0 0 0 0 2
+ 9  2 0 2 0 0 0 2 0 2
+
+
+Result
+
+    A B C D E F G H I
+ 1  0 0 0 0 0 0 0 0 0
+ 2  0 0 0 0 0 0 0 0 0
+ 3  0 0 0 0 0 0 0 0 0
+ 4  0 0 0 0 0 0 2 2 2
+ 5  0 0 0 0 0 0 2 2 2
+ 6  0 0 0 0 0 0 2 2 2
+ 7  2 2 2 0 0 0 2 2 2
+ 8  2 2 2 0 0 0 2 2 2
+ 9  2 2 2 0 0 0 2 2 2
+
+
+Percentage solved
+
+77.78%
+
+****TEST RUN****:
+
+
+
+Input
+
+    A B C
+ 1  7 0 7
+ 2  7 0 7
+ 3  7 7 0
+
+
+Output
+
+    A B C D E F G H I
+ 1  7 0 7 0 0 0 7 0 7
+ 2  7 0 7 0 0 0 7 0 7
+ 3  7 7 0 0 0 0 7 7 0
+ 4  7 0 7 0 0 0 7 0 7
+ 5  7 0 7 0 0 0 7 0 7
+ 6  7 7 0 0 0 0 7 7 0
+ 7  7 0 7 7 0 7 0 0 0
+ 8  7 0 7 7 0 7 0 0 0
+ 9  7 7 0 7 7 0 0 0 0
+
+
+Result
+
+    A B C D E F G H I
+ 1  7 7 7 0 0 0 7 7 7
+ 2  7 7 7 0 0 0 7 7 7
+ 3  7 7 7 0 0 0 7 7 7
+ 4  7 7 7 0 0 0 7 7 7
+ 5  7 7 7 0 0 0 7 7 7
+ 6  7 7 7 0 0 0 7 7 7
+ 7  7 7 7 7 7 7 0 0 0
+ 8  7 7 7 7 7 7 0 0 0
+ 9  7 7 7 7 7 7 0 0 0
+
+
+Percentage solved
+
+77.78%
+
