@@ -103,6 +103,11 @@ def train_model(model, train_dataset, output_dir, training_args=None):
     tokenizer.save_pretrained(f"{output_dir}/final_model")
 
 if __name__ == "__main__":
+    # Set random seed for reproducibility
+    torch.manual_seed(42)
+    np.random.seed(42)
+    
+
     # Load and prep dataset
     data = read_json("data/arc-agi_training_challenges.json")
     data = dict(islice(data.items(), 0, 200))  # Slice for testing
