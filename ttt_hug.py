@@ -26,75 +26,58 @@ def evaluate_adapter(
     test_task,
     formatter,
     tokenizer,
-    device="cuda",
     max_new_tokens=500,
-    num_return_sequences=1,
     temperature=0.7,
     top_p=0.9,
 ):
     """
-    Evaluate a trained adapter on a test task.
-    
-    Args:
-        trainer: SFTTrainer instance with trained model
-        test_task: ARC task to evaluate on
-        formatter: Task formatter instance
-        tokenizer: Tokenizer instance
-        device: Device to run inference on
-        max_new_tokens: Maximum number of tokens to generate
-        num_return_sequences: Number of sequences to generate per input
-        temperature: Sampling temperature
-        top_p: Top-p sampling parameter
-    
-    Returns:
-        dict: Dictionary containing evaluation results
+    Evaluate a trained adapter using HuggingFace's pipeline.
     """
     # Put model in evaluation mode
     trainer.model.eval()
-    
+    device = trainer.model.device
+
     # Format test task
     formatted_test = formatter.encode(test_task)
     results = []
     
-    # Evaluate on each test example
     for test_example in formatted_test:
-        # Prepare input
-        inputs = tokenizer.apply_chat_template(
-            test_example, 
-            return_tensors="pt"
+        # Use the tokenizer's chat template
+        prompt = tokenizer.apply_chat_template(test_example, tokenize=False)
+        
+        # Tokenize with proper padding
+        model_inputs = tokenizer(
+            prompt,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
         ).to(device)
         
-        # Generate with specified parameters
+        # Generate
         with torch.no_grad():
             outputs = trainer.model.generate(
-                inputs,
+                **model_inputs,
                 max_new_tokens=max_new_tokens,
-                num_return_sequences=num_return_sequences,
                 temperature=temperature,
                 top_p=top_p,
                 pad_token_id=tokenizer.eos_token_id,
                 do_sample=True if temperature > 0 else False,
             )
         
-        # Process outputs
-        input_length = len(inputs[0])
-        generated_responses = tokenizer.batch_decode(
-            outputs[:, input_length:],
+        # Decode output
+        generated_text = tokenizer.batch_decode(
+            outputs[:, model_inputs['input_ids'].shape[1]:],
             skip_special_tokens=True,
             clean_up_tokenization_spaces=True
         )
         
-        # Store results
         results.append({
-            "input": tokenizer.decode(inputs[0], skip_special_tokens=True),
-            "generated_responses": generated_responses,
-            "ground_truth": test_example[-1]["content"]  # Assuming last message is ground truth
+            "input": prompt,
+            "generated": generated_text[0],
+            "ground_truth": test_example[-1]["content"]
         })
     
-    return {
-        "task_name": test_task.name,
-        "results": results
-    }
+    return results
 
 
 arc_path = "./data/"
