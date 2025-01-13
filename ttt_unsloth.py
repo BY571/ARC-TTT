@@ -2,6 +2,7 @@ import copy
 import functools
 import os
 import re
+from datetime import datetime
 from multiprocessing import Pool
 
 import datasets
@@ -30,19 +31,23 @@ from unsloth.chat_templates import train_on_responses_only
 
 
 def compare_and_score_strings(label, pred):
-    length = len(label)
-    if length < len(pred):
-        pred = pred[:length]
-    elif length > len(pred):
-        pred += " " * (length - len(pred))
+    try:
+        length = len(label)
+        if length < len(pred):
+            pred = pred[:length]
+        elif length > len(pred):
+            pred += " " * (length - len(pred))
 
-    # Initialize the score
-    matching_characters = sum(1 for i in range(length) if label[i] == pred[i])
+        # Initialize the score
+        matching_characters = sum(1 for i in range(length) if label[i] == pred[i])
 
-    # Check if the strings are exactly the same
-    all_match = label == pred
+        # Check if the strings are exactly the same
+        all_match = label == pred
 
-    return all_match, matching_characters / length
+        return all_match, matching_characters / length
+    except Exception as e:
+        print(e)
+        return False, 0.0
 
 
 def get_latest_checkpoint(checkpoint_dir):
@@ -305,10 +310,12 @@ for train_data, t in zip(aug_data, arc_test_tasks):
     # tokenizer.save_pretrained("lora_model")
     # model.push_to_hub("your_name/lora_model", token = "...") # Online saving
     # tokenizer.push_to_hub("your_name/lora_model", token = "...") # Online saving
-    eval_logs = {"correct": correct.float(), "score": score}
+    eval_logs = {"correct": float(correct), "score": score}
     trainer.log(eval_logs)
     # write to local txt file
-    with open(outdir + "results.txt", "a") as f:
-        f.write(
-            f"Task: {task_id}, Correct: {correct}, Score: {score}, Model: {model_name}\n"
-        )
+    # Get the current date in a file-friendly format
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    filename = f"results_{model_name}_results_{current_date}.txt"
+
+    with open(outdir + filename, "a") as f:
+        f.write(f"Task: {task_id}, Correct: {correct}, Score: {score}\n")
