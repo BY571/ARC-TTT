@@ -11,6 +11,7 @@ Create your conda environment for training with unsloth as explained [here](http
 
 
 ## Run Arc TTT
+Does data augmentation on the training tasks and fine-tunes adapter per arc task and runs evaluation on the test task. Does not utilize a fine-tuned base model yet.    
 
 ```bash
 python ttt_unsloth.py
