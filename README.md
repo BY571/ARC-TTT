@@ -1,8 +1,9 @@
+
+> **_NOTE:_**  This repository is a work in progress. Changes and updates may occur as the project evolves.
+
 # ARC-TTT
-
-Simplified and striped down ARC-Test-Time-Training (ARC-TTT) with huggingface and unsloth.
-Originally from [MARC](https://github.com/ekinakyurek/marc/tree/main)
-
+Simplified and Stripped-Down ARC-Test-Time-Training (ARC-TTT). This implementation uses [Hugging Face](https://huggingface.co/) and [unsloth](https://unsloth.ai/), based on the original [MARC](https://github.com/ekinakyurek/marc/tree/main) repository, which used [torchtune](https://github.com/pytorch/torchtune).
+Credits to [MARC](https://github.com/ekinakyurek/marc/tree/main).
 
 ## Env Setup:
 
