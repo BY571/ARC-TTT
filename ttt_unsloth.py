@@ -73,7 +73,7 @@ def extract_assistant_output(text):
     )
     output = assistant_content[content_start:].strip()
 
-    return output
+    return output if output else ""
 
 
 def get_model(base_model):
