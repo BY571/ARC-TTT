@@ -50,22 +50,6 @@ def compare_and_score_strings(label, pred):
         return False, 0.0
 
 
-def get_latest_checkpoint(checkpoint_dir):
-    # Find all checkpoint directories
-    checkpoints = [d for d in os.listdir(checkpoint_dir) if d.startswith("checkpoint-")]
-
-    # Extract numbers and find max
-    checkpoint_numbers = [
-        int(re.search(r"checkpoint-(\d+)", cp).group(1)) for cp in checkpoints
-    ]
-
-    if not checkpoint_numbers:
-        return None
-
-    latest_number = max(checkpoint_numbers)
-    return f"checkpoint-{latest_number}"
-
-
 def extract_assistant_output(text):
     """
     Extracts the assistant's output from the given text format.
@@ -272,12 +256,6 @@ for train_data, t in zip(aug_data, arc_test_tasks):
     )
     trainer_stats = trainer.train()
 
-    # checkpoint_dir = train_conf.output_dir
-    # latest_checkpoint = get_latest_checkpoint(checkpoint_dir)
-    # if latest_checkpoint:
-    #     checkpoint_path = os.path.join(checkpoint_dir, latest_checkpoint)
-    #     ft_model = PeftModel.from_pretrained(base_model, checkpoint_path)
-
     # # Evaluate
     FastLanguageModel.for_inference(ft_model)  # Enable native 2x faster inference
 
@@ -315,7 +293,7 @@ for train_data, t in zip(aug_data, arc_test_tasks):
     # write to local txt file
     # Get the current date in a file-friendly format
     current_date = datetime.now().strftime("%Y-%m-%d")
-    filename = f"results_{model_name}_results_{current_date}.txt"
+    filename = f"results_{current_date}.txt"
 
-    with open(outdir + filename, "a") as f:
+    with open(outdir + filename, "w") as f:
         f.write(f"Task: {task_id}, Correct: {correct}, Score: {score}\n")
