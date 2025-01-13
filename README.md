@@ -14,3 +14,5 @@ Create your conda environment for training with unsloth as explained [here](http
 ```bash
 python ttt_unsloth.py
 ```
+
+Original implementation uses a fine-tuned base model. In this repo we fine-tune task adapter from scratch of a regular pre-trained model that is not yet fine-tuned on the ARC tasks.
