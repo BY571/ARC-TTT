@@ -1,13 +1,10 @@
 import copy
 import functools
 import os
-import re
 from datetime import datetime
 from multiprocessing import Pool
 
 import datasets
-import numpy as np
-import torch
 from arclib.arc import read_tasks_from_single_file
 from arclib.augmentations.utils import get_augmenters, process_task
 from arclib.messagers import GPTTextMessageRepresenterV2
@@ -16,14 +13,7 @@ from arclib.representers import (
     TextExampleRepresenter,
     TextTaskRepresenter,
 )
-from peft import get_peft_model, LoraConfig, PeftModel, prepare_model_for_kbit_training
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    BitsAndBytesConfig,
-    DataCollatorForSeq2Seq,
-    TrainingArguments,
-)
+from transformers import DataCollatorForSeq2Seq, TrainingArguments
 
 from trl import SFTTrainer
 from unsloth import FastLanguageModel, is_bfloat16_supported
@@ -86,6 +76,41 @@ def extract_assistant_output(text):
     return output
 
 
+def get_model(base_model):
+    return FastLanguageModel.get_peft_model(
+        base_model,
+        r=64,  # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
+        target_modules=[
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+        ],
+        lora_alpha=16,
+        lora_dropout=0,  # Supports any, but = 0 is optimized
+        bias="none",  # Supports any, but = "none" is optimized
+        # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
+        use_gradient_checkpointing="unsloth",  # True or "unsloth" for very long context
+        random_state=3407,
+        use_rslora=False,  # We support rank stabilized LoRA
+        loftq_config=None,  # And LoftQ
+    )
+
+
+def formatting_prompts_func(examples):
+    messages = copy.deepcopy(examples["input"])
+    messages.append({"role": "assistant", "content": examples["output"]["content"]})
+    texts = tokenizer.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=False
+    )
+    return {
+        "text": texts,
+    }
+
+
 arc_path = "./data/"
 path = arc_path + "arc-agi_training_challenges.json"
 solution_file = arc_path + "arc-agi_training_solutions.json"
@@ -131,29 +156,10 @@ base_model, tokenizer = FastLanguageModel.from_pretrained(
     load_in_4bit=load_in_4bit,
 )
 
-
-def get_model(base_model):
-    return FastLanguageModel.get_peft_model(
-        base_model,
-        r=64,  # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
-        target_modules=[
-            "q_proj",
-            "k_proj",
-            "v_proj",
-            "o_proj",
-            "gate_proj",
-            "up_proj",
-            "down_proj",
-        ],
-        lora_alpha=16,
-        lora_dropout=0,  # Supports any, but = 0 is optimized
-        bias="none",  # Supports any, but = "none" is optimized
-        # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
-        use_gradient_checkpointing="unsloth",  # True or "unsloth" for very long context
-        random_state=3407,
-        use_rslora=False,  # We support rank stabilized LoRA
-        loftq_config=None,  # And LoftQ
-    )
+tokenizer = get_chat_template(
+    tokenizer,
+    chat_template="llama-3.1",
+)
 
 
 # select augmentations
@@ -175,38 +181,7 @@ with Pool(cpus) as p:
 assert len(aug_data) == len(arc_test_tasks)
 
 
-def apply_chat_template(example, tokenizer, add_generation_prompt=False):
-    messages = copy.deepcopy(example["input"])
-    messages.append({"role": "assistant", "content": example["output"]["content"]})
-
-    # Use tokenizer to format the chat messages but don't tokenize yet
-    text = tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,  # Return raw text instead of tokenized output
-        add_generation_prompt=add_generation_prompt,
-    )
-
-    return {"text": text, "label": example["output"]["content"]}
-
-
-tokenizer = get_chat_template(
-    tokenizer,
-    chat_template="llama-3.1",
-)
-
-
-def formatting_prompts_func(examples):
-    messages = copy.deepcopy(examples["input"])
-    messages.append({"role": "assistant", "content": examples["output"]["content"]})
-    texts = tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=False
-    )
-    return {
-        "text": texts,
-    }
-
-
-# define outdir
+# define experiment outdir
 
 current_date = datetime.now().strftime("%Y-%m-%d_%H-%M")
 outdir = f"./output_{current_date}/"
@@ -218,8 +193,8 @@ for train_data, t in zip(aug_data, arc_test_tasks):
     task_outdir = outdir + task_id
 
     # per task data
-    d1 = datasets.Dataset.from_list(train_data)
-    processed_train_dataset = d1.map(formatting_prompts_func)
+    train_data = datasets.Dataset.from_list(train_data)
+    processed_train_dataset = train_data.map(formatting_prompts_func)
 
     ft_model = get_model(copy.deepcopy(base_model))
     trainer = SFTTrainer(
