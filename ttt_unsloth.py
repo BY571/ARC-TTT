@@ -27,7 +27,7 @@ from transformers import (
 
 from trl import SFTTrainer
 from unsloth import FastLanguageModel, is_bfloat16_supported
-from unsloth.chat_templates import train_on_responses_only
+from unsloth.chat_templates import get_chat_template, train_on_responses_only
 
 
 def compare_and_score_strings(label, pred):
@@ -94,7 +94,7 @@ arc_test_tasks = read_tasks_from_single_file(
     path, test=True, solution_file=solution_file
 )
 
-num_tasks = 5
+num_tasks = 20
 
 arc_test_tasks = [task for task in arc_test_tasks if "-0" in task.name]
 if num_tasks is not None:
@@ -118,7 +118,7 @@ formatter = GPTTextMessageRepresenterV2(task_representer=standard_formatter)
 # get model and tokenizer
 model_name = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"
 quantize = True
-max_seq_length = 2048  # Choose any! We auto support RoPE Scaling internally!
+max_seq_length = 5000  # Choose any! We auto support RoPE Scaling internally!
 dtype = (
     None  # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
 )
@@ -135,7 +135,7 @@ base_model, tokenizer = FastLanguageModel.from_pretrained(
 def get_model(base_model):
     return FastLanguageModel.get_peft_model(
         base_model,
-        r=16,  # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
+        r=64,  # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
         target_modules=[
             "q_proj",
             "k_proj",
@@ -189,8 +189,6 @@ def apply_chat_template(example, tokenizer, add_generation_prompt=False):
     return {"text": text, "label": example["output"]["content"]}
 
 
-from unsloth.chat_templates import get_chat_template
-
 tokenizer = get_chat_template(
     tokenizer,
     chat_template="llama-3.1",
@@ -209,7 +207,10 @@ def formatting_prompts_func(examples):
 
 
 # define outdir
-outdir = "./output/"
+
+current_date = datetime.now().strftime("%Y-%m-%d_%H-%M")
+outdir = f"./output_{current_date}/"
+filename = f"eval_results.txt"
 
 for train_data, t in zip(aug_data, arc_test_tasks):
 
@@ -218,9 +219,9 @@ for train_data, t in zip(aug_data, arc_test_tasks):
 
     # per task data
     d1 = datasets.Dataset.from_list(train_data)
-    processed_train_dataset = d1.map(formatting_prompts_func)  # , batched=True,)
+    processed_train_dataset = d1.map(formatting_prompts_func)
 
-    ft_model = get_model(base_model)
+    ft_model = get_model(copy.deepcopy(base_model))
     trainer = SFTTrainer(
         model=ft_model,
         tokenizer=tokenizer,
@@ -232,11 +233,11 @@ for train_data, t in zip(aug_data, arc_test_tasks):
         packing=False,  # Can make training 5x faster for short sequences.
         args=TrainingArguments(
             per_device_train_batch_size=2,
-            gradient_accumulation_steps=4,
+            gradient_accumulation_steps=1,
             warmup_steps=5,
-            # num_train_epochs = 1, # Set this for 1 full training run.
-            max_steps=20,
-            learning_rate=2e-4,
+            num_train_epochs=2,  # Set this for 1 full training run.
+            # max_steps=20,
+            learning_rate=1e-4,
             fp16=not is_bfloat16_supported(),
             bf16=is_bfloat16_supported(),
             logging_steps=1,
@@ -291,9 +292,25 @@ for train_data, t in zip(aug_data, arc_test_tasks):
     eval_logs = {"correct": float(correct), "score": score}
     trainer.log(eval_logs)
     # write to local txt file
-    # Get the current date in a file-friendly format
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    filename = f"results_{current_date}.txt"
+    filepath = os.path.join(outdir, filename)
 
-    with open(outdir + filename, "w") as f:
-        f.write(f"Task: {task_id}, Correct: {correct}, Score: {score}\n")
+    # Check if the file exists
+    if not os.path.exists(filepath):
+        # File does not exist: Create it and write the first entry
+        with open(filepath, "w") as f:
+            f.write(f"Task: {task_id}, Correct: {correct}, Score: {score}\n")
+    else:
+        # File exists: Append the new entry
+        with open(filepath, "a") as f:
+            f.write(f"Task: {task_id}, Correct: {correct}, Score: {score}\n")
+
+    # write eval solution
+    with open(os.path.join(task_outdir, f"eval_{task_id}.txt"), "w") as f:
+        f.write(
+            "SOLUTION:\n\n"
+            + test_output["content"]
+            + "\n\nPREDICTION:\n\n"
+            + test_output_pred
+        )
+
+    del ft_model
