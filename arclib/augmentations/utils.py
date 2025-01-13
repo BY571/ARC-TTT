@@ -104,14 +104,9 @@ def get_augmenters(
     return augmenters_to_apply
 
 
-def format_and_filter(formatter, tokenizer, task, train_on_input: False):
+def format_and_filter(formatter, task,):
     task = formatter.encode(task)
     data = {"input": task[0], "output": task[1]}
-    # combine all messages
-    messages = copy.copy(task[0])
-    messages.append(task[1])
-    encodeds = tokenizer.apply_chat_template(messages, return_tensors="pt")
-    data["total_tokens"] = encodeds.shape[-1]
     return data
 
 
@@ -169,11 +164,9 @@ def get_formatted_data(
     task: Task,
     augmenters: List[Augmenter],
     formatter: MessageRepresenter,
-    tokenizer,
     leave_n: int = 1,
     permute_n: int = 1,
     seed: int = 0,
-    max_tokens: int = 8192,
 ):
 
     train_data = get_test_time_train_data(
@@ -182,9 +175,8 @@ def get_formatted_data(
 
     formatted_data = []
     for task in train_data:
-        formatted = format_and_filter(formatter, tokenizer, task, train_on_input=False)
-        if formatted["total_tokens"] < max_tokens:
-            formatted_data.append(formatted)
+        formatted = format_and_filter(formatter, task,)
+        formatted_data.append(formatted)
 
     return formatted_data
 
@@ -193,7 +185,6 @@ def process_task(
     task: Task,
     augmenters: List[Augmenter],
     formatter: MessageRepresenter,
-    tokenizer,
     permute_n: int = 1,
     Nmax: int = 250,
     seed: int = 0,
@@ -201,10 +192,10 @@ def process_task(
     rng = np.random.RandomState(seed)
 
     leave_1_train_data = get_formatted_data(
-        task, augmenters, formatter, tokenizer, leave_n=1, permute_n=permute_n, seed=seed
+        task, augmenters, formatter, leave_n=1, permute_n=permute_n, seed=seed
     )
     leave_2_train_data = get_formatted_data(
-        task, augmenters, formatter, tokenizer, leave_n=2, permute_n=permute_n, seed=seed
+        task, augmenters, formatter, leave_n=2, permute_n=permute_n, seed=seed
     )
 
     train = leave_1_train_data

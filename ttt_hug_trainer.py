@@ -20,65 +20,66 @@ from transformers import (
     TrainingArguments,
 )
 from trl import SFTTrainer
+import os
+import re
 
-def evaluate_adapter(
-    trainer,
-    test_task,
-    formatter,
-    tokenizer,
-    max_new_tokens=500,
-    temperature=0.7,
-    top_p=0.9,
-):
-    """
-    Evaluate a trained adapter using HuggingFace's pipeline.
-    """
-    # Put model in evaluation mode
-    trainer.model.eval()
-    device = trainer.model.device
+def get_latest_checkpoint(checkpoint_dir):
+    # Find all checkpoint directories
+    checkpoints = [d for d in os.listdir(checkpoint_dir) if d.startswith('checkpoint-')]
+    
+    # Extract numbers and find max
+    checkpoint_numbers = [int(re.search(r'checkpoint-(\d+)', cp).group(1)) for cp in checkpoints]
+    
+    if not checkpoint_numbers:
+        return None
+        
+    latest_number = max(checkpoint_numbers)
+    return f"checkpoint-{latest_number}"
 
-    # Format test task
-    formatted_test = formatter.encode(test_task)
+def evaluate_arc_task(model, tokenizer, task, formatter, max_length=600):
+    """
+    Simple evaluation function for ARC tasks.
+    Returns both the model output and formatted inputs for analysis.
+    """
+    # Format the task examples
+    formatted_examples = formatter.encode(task)
     results = []
     
-    for test_example in formatted_test:
-        # Use the tokenizer's chat template
-        prompt = tokenizer.apply_chat_template(test_example, tokenize=False)
+    # Process each example
+    for example in formatted_examples:
+        # Format as chat
+        prompt = tokenizer.apply_chat_template(example, tokenize=False)
         
-        # Tokenize with proper padding
-        model_inputs = tokenizer(
+        # Tokenize
+        inputs = tokenizer(
             prompt,
             return_tensors="pt",
             padding=True,
-            truncation=True,
-        ).to(device)
+            truncation=True
+        ).to(model.device)
         
         # Generate
         with torch.no_grad():
-            outputs = trainer.model.generate(
-                **model_inputs,
-                max_new_tokens=max_new_tokens,
-                temperature=temperature,
-                top_p=top_p,
-                pad_token_id=tokenizer.eos_token_id,
-                do_sample=True if temperature > 0 else False,
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=max_length,
+                #temperature=0.7,  # Adjust as needed
+                #do_sample=True
             )
         
-        # Decode output
-        generated_text = tokenizer.batch_decode(
-            outputs[:, model_inputs['input_ids'].shape[1]:],
-            skip_special_tokens=True,
-            clean_up_tokenization_spaces=True
+        # Decode
+        generated = tokenizer.decode(
+            outputs[0, inputs['input_ids'].shape[1]:],
+            skip_special_tokens=True
         )
         
         results.append({
-            "input": prompt,
-            "generated": generated_text[0],
-            "ground_truth": test_example[-1]["content"]
+            'prompt': prompt,
+            'generated': generated,
+            'target': example[-1]['content'] if isinstance(example, list) else None
         })
     
     return results
-
 
 arc_path = "./data/"
 path = arc_path + "arc-agi_training_challenges.json"
@@ -122,7 +123,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
 base_model = AutoModelForCausalLM.from_pretrained(
     model_name,
-    device_map="auto",
+    device_map={'':torch.cuda.current_device()}, #"auto",
     quantization_config=bnb_config if quantize else None,
     torch_dtype=torch.bfloat16,
     trust_remote_code=True,
@@ -158,6 +159,7 @@ training_config = {
     "gradient_accumulation_steps": 1,
     "warmup_ratio": 0.2,
     "report_to": "wandb",
+    
 }
 train_conf = TrainingArguments(**training_config)
 peft_conf = LoraConfig(**peft_config)
@@ -183,17 +185,22 @@ with Pool(cpus) as p:
 assert len(data) == len(arc_test_tasks)
 
 
-def apply_chat_template(
-    example,
-    tokenizer,
-):
-    # list of all answer message attempts
-    messages = copy.copy(example["input"])
-    messages.append(example["output"])
-    example["text"] = tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=False
+def apply_chat_template(example, tokenizer, add_generation_prompt=False):
+    messages = copy.deepcopy(example["input"])
+    messages.append({"role": "assistant", "content": example["output"]["content"]})
+
+    # Use tokenizer to format the chat messages but don't tokenize yet
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,  # Return raw text instead of tokenized output
+        add_generation_prompt=add_generation_prompt
     )
-    return example
+
+    return {
+        "text": text,
+        "label": example["output"]["content"]
+    }
+
 
 task_outdir = train_conf.output_dir
 
@@ -219,6 +226,7 @@ for train_data, t in zip(data, arc_test_tasks):
         dataset_text_field="text",
         tokenizer=tokenizer,
         packing=True,
+        #predict_with_generate=True,
     )
     train_result = trainer.train()
     # metrics = train_result.metrics
@@ -232,31 +240,34 @@ for train_data, t in zip(data, arc_test_tasks):
 
 
     # EVAL
-    # model = PeftModel.from_pretrained(model, adapter_model_name)
-    # generate test task prompt:
-    # test_task = formatter.encode(arc_test_tasks[0])
-    # inputs = tokenizer.apply_chat_template(test_task[0], return_tensors="pt")
-    # outputs = trainer.model.generate(inputs, max_new_tokens=500)
-    # input_length = len(inputs[0])
-    # print("\n\n", tokenizer.batch_decode(inputs[0]))
-    # outtext = tokenizer.batch_decode(outputs[:, input_length:])[0]
-    # print("\n\n", outtext)
+#     formatted_test = formatter.encode(t)
+#     test_data = datasets.Dataset.from_list([{"input":formatted_test[0], "output": formatted_test[1]}])
+#     processed_test_dataset = test_data.map(
+#             apply_chat_template,
+#             fn_kwargs={"tokenizer": tokenizer},
+#             num_proc=1,
+#             desc="Applying chat template to test data",
+#         ).map(
+#     lambda example: {
+#         "input_ids": tokenizer(
+#             example["text"], truncation=True, padding="max_length", max_length=2048
+#         )["input_ids"][0],
+#         "attention_mask": tokenizer(
+#             example["text"], truncation=True, padding="max_length", max_length=2048
+#         )["attention_mask"][0],
+#         "labels": tokenizer(
+#             example["label"], truncation=True, padding="max_length", max_length=2048
+#         )["input_ids"][0]
+#     },
+#     batched=True
+# )
+    checkpoint_dir = train_conf.output_dir
+    latest_checkpoint = get_latest_checkpoint(checkpoint_dir)
+    if latest_checkpoint:
+        checkpoint_path = os.path.join(checkpoint_dir, latest_checkpoint)
+        ft_model = PeftModel.from_pretrained(base_model, checkpoint_path)
 
-    # Evaluation
-    print(f"\nEvaluating task: {task_id}")
-    eval_results = evaluate_adapter(
-        trainer=trainer,
-        test_task=t,
-        formatter=formatter,
-        tokenizer=tokenizer
-    )
-    # Print results
-    for idx, result in enumerate(eval_results["results"]):
-        print(f"\nTest Example {idx + 1}")
-        print("-" * 50)
-        print(f"Input:\n{result['input']}\n")
-        print("Generated Responses:")
-        for i, resp in enumerate(result["generated_responses"], 1):
-            print(f"{i}. {resp}")
-        print(f"\nGround Truth:\n{result['ground_truth']}")
-        print("-" * 50)
+
+    # Evaluate
+    results = evaluate_arc_task(ft_model, tokenizer, t, formatter)
+    print(results)
