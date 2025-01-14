@@ -18,7 +18,8 @@ from transformers import DataCollatorForSeq2Seq, TrainingArguments
 from trl import SFTTrainer
 from unsloth import FastLanguageModel, is_bfloat16_supported
 from unsloth.chat_templates import get_chat_template, train_on_responses_only
-
+import os
+os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 
 def compare_and_score_strings(label, pred):
     try:
@@ -280,6 +281,10 @@ for train_data, t in zip(aug_data, arc_test_tasks):
             f.write(f"Task: {task_id}, Correct: {correct}, Score: {score}\n")
 
     # write eval solution
+    if test_output_pred is None:
+        test_output_pred = "No prediction"
+    if test_output["content"] is None:
+        test_output["content"] = "No solution"
     with open(os.path.join(task_outdir, f"eval_{task_id}.txt"), "w") as f:
         f.write(
             "SOLUTION:\n\n"
