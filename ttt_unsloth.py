@@ -294,3 +294,4 @@ for train_data, t in zip(aug_data, arc_test_tasks):
         )
 
     del ft_model
+    del trainer
