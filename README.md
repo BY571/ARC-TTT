@@ -18,3 +18,10 @@ python ttt_unsloth.py
 ```
 
 Original implementation uses a fine-tuned base model. In this repo we fine-tune task adapter from scratch of a regular pre-trained model that is not yet fine-tuned on the ARC tasks.
+
+
+## Results
+
+TTT performance over 20 tasks compared to untrained base model:
+ 
+![alt text](/media/20-task-adapeter64.png.png)
