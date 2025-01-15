@@ -24,4 +24,4 @@ Original implementation uses a fine-tuned base model. In this repo we fine-tune 
 
 TTT performance over 20 tasks compared to untrained base model:
  
-![alt text](/media/20-task-adapeter64.png.png)
+![alt text](/media/20-task-adapeter64.png)
